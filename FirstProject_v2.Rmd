@@ -1,0 +1,208 @@
+---
+title:"RMD Version of Final Project" 
+output:html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+### The URL for our Team GitHub repository is {your unique URL}.
+### Team: Yecheng Li, Doris Long, Vera Wang, Jikun Zhou
+### Class: BUS 111A
+### Project: Pilgrim case study
+
+### Installing & Loading Packages
+```{r}
+library(rmarkdown) ### This loads the package
+```
+
+### Read the file and process the missing data
+
+```{r}
+### Check who left the bank in 2000, named the variable as "LeftBank"
+### Check who didn't left the bank in 2000, and the income or age in 1999 were missing, we named the variable as "fixAge" and "fixIncome"
+### for "fixAge"== TRUE, we substitute "NA" to be "4", which is the median
+### for "fixIncome"== TRUE, we substitute "NA" to be "6", which is the mean
+
+consumerDB = read.csv("dataset.csv")
+## check : summary(consumerDB)
+consumerDB$LeftBank = is.na(consumerDB$X0Online) & is.na(consumerDB$X0Billpay)
+## check : View(consumerDB)
+AgeMedian_1999 = median(consumerDB$X9Age,na.rm = TRUE) 
+IncomeMean_1999 = median(consumerDB$X9Inc,na.rm = TRUE) 
+AgeMedian_1999
+IncomeMean_1999
+consumerDB$fixAge = !consumerDB$LeftBank & is.na(consumerDB$X9Age)
+consumerDB$fixIncome = !consumerDB$LeftBank & is.na(consumerDB$X9Inc)
+consumerDB[consumerDB$fixAge,]$X9Age = 4
+## check: View(consumerDB)
+consumerDB[consumerDB$fixIncome,]$X9Inc = 6
+### summary(consumerDB)
+```
+
+```{r}
+boxplot(X9Profit~X9Age, data = consumerDB, 
+        main = "Box-Plot of Profit Distribution by Age",  ## Sets Title to Plot
+        xlab = "Age", ylab = "Profit") ### Sets X and Y Axes Labels
+```
+
+
+```{r}
+boxplot(X9Profit~X9Inc, data = consumerDB, 
+        main = "Box-Plot of Profit Distribution by Income",  ## Sets Title to Plot
+        xlab = "Income", ylab = "Profit") ### Sets X and Y Axes Labels
+```
+
+```{r}
+hist(consumerDB$X9Profit, main = "Histogram of Profits Cont. Profit", 
+     xlab = "Profits", ylab = "Count (#)", col = "green", n = 100)
+
+```
+
+
+```{r}
+hist(consumerDB$X9Profit, main = "Histogram of Profits Cont. Profit Range(-221  -  500)", 
+     xlab = "Profits", ylab = "Count (#)", col = "green", xlim = c(-221,500), n = 200)
+
+```
+
+
+```{r}
+library(plyr)
+summary_table = ddply(consumerDB, .(X9Age), 
+                            summarize, Mean = mean(X9Profit), 
+                            StandardDeviation = sd(X9Profit))
+t(round(summary_table,2))
+### check :View(consumerDB)
+```
+
+
+
+```{r}
+#1999 Income with online and billpay
+summary_Income_1999 = ddply(consumerDB, .(X9Inc), 
+                            summarize, '0' = sum(X9Online,X9Online==0), '1' = sum(X9Online,X9Online==1))
+summary_Income_1999
+```
+
+```{r}
+#1999 Age with online and billpay
+summary_Age_1999 = ddply(consumerDB, .(X9Age), 
+                            summarize, '0' = sum(X9Online,X9Online==0), '1' = sum(X9Online,X9Online==1))
+summary_Age_1999
+```
+
+
+
+
+```{r}
+### stats Table is wrong
+statsTable1999= consumerDB[,2:6]
+###View(statsTable1999)
+X9Billpay = consumerDB[,10]
+statsTable1999= cbind(statsTable1999,X9Billpay)
+#View(statsTable1999)
+summary(statsTable1999)
+### summary(consumerDB)
+### statsTable1999=summary.data.frame((statsTable1999)[1:6,])
+
+```
+
+
+```{r}
+
+## Creating Tenure levels
+consumerDB$Tenure.Level = "0"
+consumerDB[consumerDB$X9Tenure <= 3.00,]$Tenure.Level = "Level 1"
+consumerDB[consumerDB$X9Tenure > 3.00 & consumerDB$X9Tenure <= 6.00,]$Tenure.Level = "Level 2"
+consumerDB[consumerDB$X9Tenure > 6.00 & consumerDB$X9Tenure <= 9.00,]$Tenure.Level = "Level 3"
+consumerDB[consumerDB$X9Tenure > 9.00 & consumerDB$X9Tenure <= 12.00,]$Tenure.Level = "Level 4"
+consumerDB[consumerDB$X9Tenure > 12.00 & consumerDB$X9Tenure <= 15.00,]$Tenure.Level = "Level 5"
+consumerDB[consumerDB$X9Tenure > 15.00 & consumerDB$X9Tenure <= 18.00,]$Tenure.Level = "Level 6"
+consumerDB[consumerDB$X9Tenure > 18.00 & consumerDB$X9Tenure <= 21.00,]$Tenure.Level = "Level 7"
+consumerDB[consumerDB$X9Tenure > 21.00 & consumerDB$X9Tenure <= 24.00,]$Tenure.Level = "Level 8"
+consumerDB[consumerDB$X9Tenure > 24.00 & consumerDB$X9Tenure <= 27.00,]$Tenure.Level = "Level 9"
+consumerDB[consumerDB$X9Tenure > 27.00 & consumerDB$X9Tenure <= 30.00,]$Tenure.Level = "Level X0"
+consumerDB[consumerDB$X9Tenure > 30.00 & consumerDB$X9Tenure <= 33.00,]$Tenure.Level = "Level X1"
+consumerDB[consumerDB$X9Tenure > 33.00 & consumerDB$X9Tenure <= 36.00,]$Tenure.Level = "Level X2"
+consumerDB[consumerDB$X9Tenure > 36.00 & consumerDB$X9Tenure <= 39.00,]$Tenure.Level = "Level X3"
+consumerDB[consumerDB$X9Tenure > 39.00 & consumerDB$X9Tenure <= 42.00,]$Tenure.Level = "Level X4"
+table(consumerDB$Tenure.Level,consumerDB$X9Online)
+#as.data.frame(consumerDB$Tenure.Level,consumerDB$X9Online)
+table(consumerDB$Tenure.Level,consumerDB$X9Billpay)
+
+```
+
+
+
+
+```{r}
+### Problem 3 answer
+### Please install.packages("psych")
+
+library(psych)
+Summary_Table=t(describe(statsTable1999))
+Summary_Table = round(Summary_Table,2)
+Summary_Table_New = Summary_Table[c(3:5,8:10),c(1,3,4,5)]
+Summary_Table_New
+
+```
+
+
+```{r}
+### useless
+
+
+##View(consumerDB)
+plot(consumerDB$X9Tenure ~ consumerDB$X9Profit,  main = "Scatter plot of Income and profits", 
+     xlab = "Income ($)", ylab = "Profit(#)")
+
+```
+
+
+```{r}
+boxplot(X9Profit~X9District, data = consumerDB, 
+        main = "Box-Plot of Profit Distribution by District",  ## Sets Title to Plot
+        xlab = "District", ylab = "Profit", ylim = c(-100,200))### Sets X and Y Axes Labels
+
+
+```
+
+### question 6 + corrlation
+
+```{r}
+
+consumerDB2=consumerDB[!is.na(consumerDB$X9Inc),]
+consumerDB2=consumerDB2[!is.na(consumerDB2$X9Age),]
+#consumerDB2$Na= is.na(consumerDB2$X9Inc ) || is.na(consumerDB2$X9Age)
+# View(consumerDB2)
+# summary(consumerDB2)
+# consumerDB2 means no missing data in 1999 Age and Income
+cor(x=consumerDB2$X9Profit, y=consumerDB2$X9Inc)
+cor(x=consumerDB2$X9Profit, y=consumerDB2$X9Age)
+cor(x=consumerDB$X9Profit, y=consumerDB$X9Online)
+cor(x=consumerDB$X9Profit, y=consumerDB$X9Billpay)
+cor(x=consumerDB$X9Profit, y=consumerDB$X9Tenure)
+cor(x=consumerDB$X9Profit, y=consumerDB$X9District)
+```
+
+
+```{r}
+### Profit& District
+boxplot(X9Profit~X9District, data = consumerDB, 
+        main = "Box-Plot of Profit Distribution by District",  ## Sets Title to Plot
+        xlab = "District", ylab = "Profit",ylim=c(0,200)) ### Sets X and Y Axes Labels
+###Profit& Billpay
+boxplot(X9Profit~X9Billpay, data = consumerDB, 
+        main = "Box-Plot of Profit Distribution by Billpay",  ## Sets Title to Plot
+        xlab = "Billpay", ylab = "Profit",ylim=c(0,400)) ### Sets X and Y Axes Labels
+###Profit& Online
+boxplot(X9Profit~X9Online, data = consumerDB, 
+        main = "Box-Plot of Profit Distribution by Online",  ## Sets Title to Plot
+        xlab = "Online", ylab = "Profit", ylim=c(0,200)) ### Sets X and Y Axes Labels
+```
+
+
+
+
