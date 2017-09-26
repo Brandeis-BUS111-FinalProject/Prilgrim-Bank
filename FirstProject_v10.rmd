@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-### The URL for our Team GitHub repository is {https://github.com/DEISLI/Prilgrim-Bank.git}.
+### The URL for our Team GitHub repository is {https://github.com/Brandeis-BUS111-FinalProject/Prilgrim-Bank.git}.
 ### Team: Yecheng Li, Doris Long, Vera Wang, Jikun Zhou
 ### Class: BUS 111A
 ### Project: Pilgrim case study
